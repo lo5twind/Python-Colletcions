@@ -12,27 +12,27 @@ import os
 # fetch result will return a dict
 DB = {
         'host': 'localhost',
-        'port': 0,
-        'user': 'username',
-        'passwd': 'passwd',
-        'db': 'dbname',
+        'port': 3306,
+        'user': 'root',
+        'passwd': '123',
+        'db': 'test',
         'charset': 'utf8',
         #'use_unicode':False,
         'cursorclass': MySQLdb.cursors.DictCursor,
-        'unix_socket': '/tmp/sockname.sock'
+        'unix_socket': '/var/run/mysqld/mysqld.sock'
         }
 
 # fetch result will return a list
 DB1 = {
         'host': 'localhost',
-        'port': 0,
-        'user': 'username',
-        'passwd': 'passwd',
-        'db': 'dbname',
+        'port': 3306,
+        'user': 'root',
+        'passwd': '123',
+        'db': 'test',
         'charset': 'utf8',
         #'use_unicode':False,
         # 'cursorclass': MySQLdb.cursors.DictCursor,
-        'unix_socket': '/tmp/sockname.sock'
+        'unix_socket': '/var/run/mysqld/mysqld.sock'
         }
 
 
