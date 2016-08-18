@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'my_google_auth.apps.MyGoogleAuthConfig',
+    'polls',
     # 'my_google_auth',
 ]
 
