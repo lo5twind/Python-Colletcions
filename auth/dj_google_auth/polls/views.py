@@ -5,7 +5,6 @@ from django.shortcuts import render, get_object_or_404
 from .models import Question
 # Create your views here.
 
-app_name = 'polls'
 def index(request):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     template = loader.get_template('polls/index.html')
