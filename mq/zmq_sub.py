@@ -13,6 +13,10 @@ REQ_POTR = 5001
 ZMQ_ADDR = "tcp://127.0.0.1:{port:}"
 ZMQ_PREFIX = r'ZMQ://'
 ZMQ_MSG = lambda x : ZMQ_PREFIX + x
+ZMQ_STAT = lambda ty, msg : ZMQ_MSG("{%s:'%s'}" % (ty, msg))
+
+ZMQ_EXIT = ZMQ_STAT('command', 'exit')
+ZMQ_INVALIDE_MSG = ZMQ_STAT('error', 'invalide message')
 
 __all__ = ['zmq_sub_socket', 'zmq_req_socket']
 

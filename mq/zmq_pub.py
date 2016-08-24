@@ -5,6 +5,7 @@ import sys
 import zmq
 import time
 import json
+import copy
 import threading
 from contextlib import contextmanager
 from zmq_sub import zmq_req_socket
@@ -14,7 +15,11 @@ REP_POTR = 5001
 ZMQ_ADDR = "tcp://127.0.0.1:{port:}"
 ZMQ_PREFIX = r'ZMQ://'
 ZMQ_MSG = lambda x : ZMQ_PREFIX + x
-ZMQ_EXIT = ZMQ_MSG("{command:'exit'}")
+# ZMQ_EXIT = ZMQ_MSG("{command:'exit'}")
+ZMQ_STAT = lambda ty, msg : ZMQ_MSG("{%s:'%s'}" % (ty, msg))
+
+ZMQ_EXIT = ZMQ_STAT('command', 'exit')
+ZMQ_INVALIDE_MSG = ZMQ_STAT('error', 'invalide message')
 
 
 def zmq_pub():
@@ -71,7 +76,7 @@ def zmq_rep_socket():
     finally:
         rep_socket.close()
         print 'ZmqPubServer: rep_socket Exit'
-    pass
+
 
 class ZmqPubServer(threading.Thread):
 
@@ -111,11 +116,11 @@ class ZmqPubServer(threading.Thread):
             # modify here
             self.reg_event_status[item] = time.ctime()
 
-        # how to judage 2 dict
+        # if event status not change
         if self.reg_event_status_last == self.reg_event_status:
             return False
 
-        self.reg_event_status_last = self.reg_event_status
+        self.reg_event_status_last = copy.deepcopy(self.reg_event_status)
         return True
 
 
@@ -126,11 +131,9 @@ class ZmqPubServer(threading.Thread):
         th.start()
         with zmq_pub_socket() as pub_socket:
             while 1:
-                # use zmq_pub to publish msg
-                print self.reg_event_status
-                print self.reg_event_status_last
                 # update event status
                 if self.update_event_status():
+                    # use zmq_pub to publish msg
                     msg = ZMQ_JSON_MSG(self.reg_event_status)
                     pub_socket.send(msg)
 
