@@ -117,12 +117,19 @@ class ZmqSubClient(threading.Thread):
             else:
                 print 'ZmqSubClient: add event[%s] Error...' % event
 
+
+    def process_message(self, dmsg):
+        if not dmsg:
+            return None
+        print dmsg
+        pass
+
     def run(self):
         with zmq_sub_socket() as sub_socket:
             while 1:
                 msg = sub_socket.recv()
                 print 'ZmqSubClient: get msg[%s]' % msg
-                print self.zmq_message_parser(msg)
+                self.process_message(self.zmq_message_parser(msg))
 
             pass
 

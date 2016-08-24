@@ -80,6 +80,8 @@ def zmq_rep_socket():
 
 class ZmqPubServer(threading.Thread):
 
+    event_monitors = set()
+
     def __init__(self):
         super(ZmqPubServer, self).__init__()
 
@@ -88,8 +90,12 @@ class ZmqPubServer(threading.Thread):
         self.reg_event_status_last = {}
         self.reg_event_set = set()
 
+
     def event_add_handler(self, handler, *args, **kwargs):
         handler(*args, **kwargs)
+
+    def event_add_monitor(self, cmd_or_func, typ):
+        pass
 
 
     def event_register(self):
@@ -112,16 +118,22 @@ class ZmqPubServer(threading.Thread):
     def update_event_status(self):
         pass
 
+        new_event_status = {}
         for item in self.reg_event_set:
             # modify here
             self.reg_event_status[item] = time.ctime()
 
         # if event status not change
         if self.reg_event_status_last == self.reg_event_status:
-            return False
+            return new_event_status
+
+        for key in self.reg_event_status:
+            if not self.reg_event_status == self.reg_event_status_last:
+                new_event_status[key] = self.reg_event_status[key]
 
         self.reg_event_status_last = copy.deepcopy(self.reg_event_status)
-        return True
+
+        return new_event_status
 
 
     def run(self):
@@ -132,9 +144,10 @@ class ZmqPubServer(threading.Thread):
         with zmq_pub_socket() as pub_socket:
             while 1:
                 # update event status
-                if self.update_event_status():
+                new_status =  self.update_event_status()
+                if new_status:
                     # use zmq_pub to publish msg
-                    msg = ZMQ_JSON_MSG(self.reg_event_status)
+                    msg = ZMQ_JSON_MSG(new_status)
                     pub_socket.send(msg)
 
                 time.sleep(1)
