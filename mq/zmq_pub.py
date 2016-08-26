@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding=utf-8
 
+
+import os
 import sys
 import zmq
 import time
@@ -8,7 +10,7 @@ import json
 import copy
 import threading
 from contextlib import contextmanager
-from zmq_sub import zmq_req_socket
+
 
 PUB_POTR = 5000
 REP_POTR = 5001
@@ -78,6 +80,42 @@ def zmq_rep_socket():
         print 'ZmqPubServer: rep_socket Exit'
 
 
+class EventMonitors(object):
+
+
+    def __init__(self):
+        super(EventMonitors, self).__init__()
+        base_attr = set(dir(EventMonitors.__class__.__mro__[-1]))
+        event_attr = set(dir(EventMonitors))
+        for func in base_attr ^ event_attr:
+            callable_func = getattr(EventMonitors, func)
+            if callable(callable_func):
+                setattr(self.__class__, func.upper(), func)
+
+    @classmethod
+    def update_file_mtime(cls, file_list, res):
+        for f in file_list:
+            try:
+                f_name = os.path.split(f)[1]
+                res[f_name] = os.path.getmtime(f)
+            except OSError:
+                continue
+
+
+    @classmethod
+    def update_file_size(cls, file_list, res):
+        for f in file_list:
+            try:
+                f_name = os.path.split(f)[1]
+                res[f_name] = os.path.getsize(f)
+            except OSError:
+                continue
+
+
+    @classmethod
+    def update_table_mtime(cls, tb_list, res_list):
+        pass
+
 class ZmqPubServer(threading.Thread):
 
     event_monitors = set()
@@ -86,16 +124,28 @@ class ZmqPubServer(threading.Thread):
         super(ZmqPubServer, self).__init__()
 
         self.event = threading.Event()
+        self.event_monitors = {}
+        self.event_queue = {}
+
         self.reg_event_status = {}
         self.reg_event_status_last = {}
         self.reg_event_set = set()
 
 
+        base_attr = set(dir(EventMonitors.__class__.__mro__[-1]))
+        event_attr = set(dir(EventMonitors))
+        for func in base_attr ^ event_attr:
+            callable_func = getattr(EventMonitors, func)
+            if callable(callable_func):
+                # setattr(self.__class__, func, callable_func)
+                setattr(self.__class__, func.upper(), func)
+                self.event_monitors[func] = callable_func
+                self.event_queue[func] = []
+
+
+
     def event_add_handler(self, handler, *args, **kwargs):
         handler(*args, **kwargs)
-
-    def event_add_monitor(self, cmd_or_func, typ):
-        pass
 
 
     def event_register(self):
@@ -104,24 +154,46 @@ class ZmqPubServer(threading.Thread):
                 msg = rep_socket.recv()
                 print 'zmq_server get msg[%s]' % msg
                 # add by a handler, wait to modify
-                self.reg_event_set.add(msg)
                 rep_socket.send(msg)
                 if msg == ZMQ_EXIT:
                     break
+                self.reg_event_set.add(msg)
+                msg_d = self.zmq_message_parser(msg)
+                try:
+                    for event in msg_d:
+                        func_name = msg_d[event]
+                        if func_name in self.event_queue:
+                            self.event_queue[func_name].append(event)
+                except:
+                    print 'event register error'
+                    continue
+
+    def zmq_message_parser(self, msg):
+        msg = msg.lstrip(ZMQ_PREFIX)
+        try:
+            res = json.loads(msg)
+        except:
+            res = None
+        return res
 
     def zmq_json_msg(self, d):
         if isinstance(d, dict):
-            res =json.dumps(d)
+            res = json.dumps(d)
         return res or ''
 
     # can override here for different work!!!
     def update_event_status(self):
-        pass
 
         new_event_status = {}
-        for item in self.reg_event_set:
-            # modify here
-            self.reg_event_status[item] = time.ctime()
+        for event in self.event_monitors:
+            self.event_monitors[event](self.event_queue[event],
+                                       self.reg_event_status)
+
+        # for reg_event in self.reg_event_set:
+        #
+        #     self.event_monitors[reg_event](self.reg_event_set[])
+
+        # EventMonitors.update_file_mtime(self.reg_event_set, self.reg_event_status)
 
         # if event status not change
         if self.reg_event_status_last == self.reg_event_status:
@@ -132,6 +204,7 @@ class ZmqPubServer(threading.Thread):
                 new_event_status[key] = self.reg_event_status[key]
 
         self.reg_event_status_last = copy.deepcopy(self.reg_event_status)
+        print new_event_status
 
         return new_event_status
 
@@ -161,6 +234,7 @@ if __name__ == '__main__':
         # ser.event_register()
         ser.run()
     except KeyboardInterrupt:
+        from zmq_sub import zmq_req_socket
         with zmq_req_socket() as req_socket:
             req_socket.send(ZMQ_EXIT)
             req_socket.recv()

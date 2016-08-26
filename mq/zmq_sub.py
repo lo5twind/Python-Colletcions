@@ -15,7 +15,7 @@ ZMQ_PREFIX = r'ZMQ://'
 ZMQ_MSG = lambda x : ZMQ_PREFIX + x
 ZMQ_STAT = lambda ty, msg : ZMQ_MSG("{%s:'%s'}" % (ty, msg))
 
-ZMQ_EXIT = ZMQ_STAT('command', 'exit')
+ZMQ_EXIT = ZMQ_STAT('command', 'exit_sub')
 ZMQ_INVALIDE_MSG = ZMQ_STAT('error', 'invalide message')
 
 __all__ = ['zmq_sub_socket', 'zmq_req_socket']
@@ -96,7 +96,8 @@ class ZmqSubClient(threading.Thread):
             raise TypeError('ZmqSubClient: TypeError %s is not a list' % event)
 
         for h in self.reg_event[event]:
-            h()
+            if callable(h):
+                h()
 
 
     def zmq_message_parser(self, msg):
@@ -107,11 +108,12 @@ class ZmqSubClient(threading.Thread):
             res = None
         return res
 
-    def register_event(self, event, handler):
+    def register_event(self, event, event_type=None, handler=None):
+        event_msg = json.dumps({event : event_type})
         with zmq_req_socket() as req_socket:
-            req_socket.send(event)
+            req_socket.send(event_msg)
             msg = req_socket.recv()
-            if msg == event:
+            if msg == event_msg:
                 self.add_event_handler(event, handler)
                 print 'ZmqSubClient: add event[%s] Success...' % event
             else:
@@ -137,9 +139,13 @@ class ZmqSubClient(threading.Thread):
 if __name__ == '__main__':
     import sys
     # zmq_client(sys.argv[1])
+    # collecting to server, if server is down, exit
+    # init class Eventmonitors
+    from zmq_pub import EventMonitors
+    EventMonitors()
     try:
         cli = ZmqSubClient()
-        cli.register_event(sys.argv[1], sys.argv[0])
+        cli.register_event(sys.argv[1], event_type=EventMonitors.UPDATE_FILE_MTIME)
         cli.run()
     except KeyboardInterrupt:
         print 'ZmqSubClient: Quit...'
