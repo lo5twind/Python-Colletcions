@@ -10,18 +10,7 @@ import json
 import copy
 import threading
 from contextlib import contextmanager
-
-
-PUB_POTR = 5000
-REP_POTR = 5001
-ZMQ_ADDR = "tcp://127.0.0.1:{port:}"
-ZMQ_PREFIX = r'ZMQ://'
-ZMQ_MSG = lambda x : ZMQ_PREFIX + x
-# ZMQ_EXIT = ZMQ_MSG("{command:'exit'}")
-ZMQ_STAT = lambda ty, msg : ZMQ_MSG("{%s:'%s'}" % (ty, msg))
-
-ZMQ_EXIT = ZMQ_STAT('command', 'exit')
-ZMQ_INVALIDE_MSG = ZMQ_STAT('error', 'invalide message')
+from zmq_conf import *
 
 
 def zmq_pub():
@@ -118,7 +107,6 @@ class EventMonitors(object):
 
 class ZmqPubServer(threading.Thread):
 
-    event_monitors = set()
 
     def __init__(self):
         super(ZmqPubServer, self).__init__()

@@ -7,16 +7,7 @@ import time
 import json
 import threading
 from contextlib import contextmanager
-
-SUB_POTR = 5000
-REQ_POTR = 5001
-ZMQ_ADDR = "tcp://127.0.0.1:{port:}"
-ZMQ_PREFIX = r'ZMQ://'
-ZMQ_MSG = lambda x : ZMQ_PREFIX + x
-ZMQ_STAT = lambda ty, msg : ZMQ_MSG("{%s:'%s'}" % (ty, msg))
-
-ZMQ_EXIT = ZMQ_STAT('command', 'exit_sub')
-ZMQ_INVALIDE_MSG = ZMQ_STAT('error', 'invalide message')
+from zmq_conf import *
 
 __all__ = ['zmq_sub_socket', 'zmq_req_socket']
 
@@ -83,6 +74,7 @@ class ZmqSubClient(threading.Thread):
         super(ZmqSubClient, self).__init__()
 
         self.reg_event = {}
+        self.exit = threading.Event()
 
 
     def add_event_handler(self, event, handler):
@@ -129,12 +121,19 @@ class ZmqSubClient(threading.Thread):
     def run(self):
         with zmq_sub_socket() as sub_socket:
             while 1:
+                if self.exit.isSet():
+                    break
                 msg = sub_socket.recv()
                 print 'ZmqSubClient: get msg[%s]' % msg
                 self.process_message(self.zmq_message_parser(msg))
 
             pass
 
+    def exit(self):
+        with zmq_req_socket() as req_socket:
+            req_socket.send(ZMQ_SUB_EXIT)
+            msg = req_socket.recv()
+        pass
 
 if __name__ == '__main__':
     import sys
@@ -146,6 +145,10 @@ if __name__ == '__main__':
     try:
         cli = ZmqSubClient()
         cli.register_event(sys.argv[1], event_type=EventMonitors.UPDATE_FILE_MTIME)
-        cli.run()
+        cli.register_event(sys.argv[2], event_type=EventMonitors.UPDATE_FILE_MTIME)
+        # cli.run()
+        cli.start()
+        time.sleep(20)
+        cli.exit()
     except KeyboardInterrupt:
         print 'ZmqSubClient: Quit...'
