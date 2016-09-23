@@ -128,11 +128,15 @@ class ZmqSubClient(threading.Thread):
                 self.process_message(self.zmq_message_parser(msg))
 
             pass
+        print 'exit zmq_sub_socket'
 
-    def exit(self):
+    def exit_sub(self):
+        print 'exit'
+        self.exit.set()
         with zmq_req_socket() as req_socket:
             req_socket.send(ZMQ_SUB_EXIT)
             msg = req_socket.recv()
+        print 'exit'
         pass
 
 if __name__ == '__main__':
@@ -142,13 +146,15 @@ if __name__ == '__main__':
     # init class Eventmonitors
     from zmq_pub import EventMonitors
     EventMonitors()
+    cli = ZmqSubClient()
     try:
-        cli = ZmqSubClient()
         cli.register_event(sys.argv[1], event_type=EventMonitors.UPDATE_FILE_MTIME)
         cli.register_event(sys.argv[2], event_type=EventMonitors.UPDATE_FILE_MTIME)
         # cli.run()
+        cli.setDaemon(True)
         cli.start()
-        time.sleep(20)
-        cli.exit()
+        time.sleep(2)
     except KeyboardInterrupt:
         print 'ZmqSubClient: Quit...'
+    finally:
+        cli.exit_sub()
