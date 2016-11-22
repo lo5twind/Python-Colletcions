@@ -1,0 +1,9 @@
+<script>  
+var socket = new WebSocket('ws://localhost:3368');
+socket.send("Hello Python");  
+socket.onmessage = function(result,nTime){  
+alert("Receviced Data from webservice:");  
+alert("From last receice to now:" + nTime);  
+console.log(result);  
+}  
+</script>

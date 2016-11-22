@@ -19,7 +19,8 @@ DB = {
         'charset': 'utf8',
         #'use_unicode':False,
         'cursorclass': MySQLdb.cursors.DictCursor,
-        'unix_socket': '/var/run/mysqld/mysqld.sock'
+        # 'unix_socket': '/var/run/mysqld/mysqld.sock'
+        'unix_socket': '/var/lib/mysql/mysql.sock'
         }
 
 # fetch result will return a list
