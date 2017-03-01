@@ -4,6 +4,7 @@ import sys
 os.chdir('/root/python/Python-Colletcions')
 if '/root/python/Python-Colletcions' not in sys.path:
     sys.path.append('/root/python/Python-Colletcions')
+
 import time
 from utils.system_usage import cpu_usage, mem_usage, disk_usage
 
@@ -63,7 +64,6 @@ def sublime_channel(environ, start_response):
     with open('/root/python/Python-Colletcions/REST/data/channel_v3.json') as fp:
         resp = ''.join(fp.readlines())
     yield resp.encode('utf-8')
-
 
 if __name__ == '__main__':
     from REST.resty import PathDispatcher

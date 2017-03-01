@@ -15,12 +15,30 @@ DB = {
         'port': 3306,
         'user': 'root',
         'passwd': '123',
-        'db': 'test',
+        'db': 'db1',
+        # 'db': 'TESTDB',
         'charset': 'utf8',
         #'use_unicode':False,
         'cursorclass': MySQLdb.cursors.DictCursor,
-        'unix_socket': '/var/run/mysqld/mysqld.sock'
-        }
+        # 'unix_socket': '/var/run/mysqld/mysqld.sock'
+        # 'unix_socket': '/var/lib/mysql/mysql.sock'
+}
+# setting for MyCat
+# DB = {
+#         # 'host': 'localhost',
+#         # 'port': 3306,
+#         'host': '127.0.0.1',
+#         'port': 8066,
+#         'user': 'root',
+#         'passwd': '123456',
+#         # 'db': 'test',
+#         'db': 'TESTDB',
+#         'charset': 'utf8',
+#         #'use_unicode':False,
+#         'cursorclass': MySQLdb.cursors.DictCursor,
+#         # 'unix_socket': '/var/run/mysqld/mysqld.sock'
+#         # 'unix_socket': '/var/lib/mysql/mysql.sock'
+# }
 
 # fetch result will return a list
 DB1 = {

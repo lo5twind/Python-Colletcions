@@ -14,12 +14,12 @@ LOG_LEVEL = logging.NOTSET
 DB = {
     'host': 'localhost',
     'port': 3306,
-    'user': 'username',
-    'passwd': 'passwd',
-    'db': 'dbname',
+    'user': 'root',
+    'passwd': '123',
+    'db': 'db1',
     'charset': 'utf8',
     'use_unicode':True,
-    'unix_socket': '/tmp/mysql3306.sock',
+    # 'unix_socket': '/tmp/mysql3306.sock',
 }
 
 DICT_DB = {
