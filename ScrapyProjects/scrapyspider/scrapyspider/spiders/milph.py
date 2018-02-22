@@ -1,5 +1,6 @@
 from scrapy.spiders import Spider
 from scrapy.http import Request
+from scrapyspider.items import ScrapyspiderItem 
 
 class MilphSpider(Spider):
     name = 'milph'
@@ -19,11 +20,18 @@ class MilphSpider(Spider):
                 yield Request(new_url, callback=self.parse)
         elif 'gallery' in url:
             if url.endswith('php'):
-                jpg = response.xpath('//img').re("\d+\.jpg")[0]
-                lurl = url.split('/')
-                lurl[-1] = jpg
-                jpg_url = '/'.join(lurl)
-                print 'dealing pic url[%s]' % jpg_url 
+                jpg = response.xpath('//img').re("\d+\.jpg")
+                # url: http://xxx.yy/category/z.php
+                # host: http://xxx.yy/category/
+                lurl = url.rsplit('/', 1)
+                host_url = lurl[0]
+                # lurl[-1] = jpg
+                # jpg_url = '/'.join(lurl)
+                # print 'dealing pic url[%s]' % jpg_url 
+                item = ScrapyspiderItem()
+                print 'dealing pic url: %s' % [ '/'.join([host_url, jpg_url]) for jpg_url in jpg ]
+                item['image_urls'] = [ '/'.join([host_url, jpg_url]) for jpg_url in jpg ]
+                yield item
             else:
                 print 'dealing gallery url[%s]' % url
                 for i in response.xpath('//div[@class="item"]'):

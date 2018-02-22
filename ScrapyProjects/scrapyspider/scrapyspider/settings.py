@@ -67,6 +67,12 @@ ROBOTSTXT_OBEY = True
 #ITEM_PIPELINES = {
 #    'scrapyspider.pipelines.ScrapyspiderPipeline': 300,
 #}
+ITEM_PIPELINES = {
+    'scrapyspider.pipelines.ScrapyspiderImagesPipeline': 1,
+}
+
+IMAGES_STORE = '/Users/xinqxing/Pictures/milph'
+IMAGES_EXPIRES = 90  #90天内抓取的都不会被重抓
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
