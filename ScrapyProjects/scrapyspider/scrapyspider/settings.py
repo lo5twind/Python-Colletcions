@@ -71,7 +71,7 @@ ITEM_PIPELINES = {
     'scrapyspider.pipelines.ScrapyspiderImagesPipeline': 1,
 }
 
-IMAGES_STORE = '/Users/xinqxing/Pictures/milph'
+IMAGES_STORE = '/root/Downloads/milph'
 IMAGES_EXPIRES = 90  #90天内抓取的都不会被重抓
 
 # Enable and configure the AutoThrottle extension (disabled by default)

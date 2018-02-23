@@ -29,7 +29,7 @@ class MilphSpider(Spider):
                 # jpg_url = '/'.join(lurl)
                 # print 'dealing pic url[%s]' % jpg_url 
                 item = ScrapyspiderItem()
-                print 'dealing pic url: %s' % [ '/'.join([host_url, jpg_url]) for jpg_url in jpg ]
+                # print 'dealing pic url: %s' % [ '/'.join([host_url, jpg_url]) for jpg_url in jpg ]
                 item['image_urls'] = [ '/'.join([host_url, jpg_url]) for jpg_url in jpg ]
                 yield item
             else:

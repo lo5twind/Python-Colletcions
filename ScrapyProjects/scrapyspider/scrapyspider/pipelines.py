@@ -17,7 +17,7 @@ class ScrapyspiderPipeline(object):
 class ScrapyspiderImagesPipeline(ImagesPipeline):
     def get_media_requests(self, item, info):
         for image_url in item['image_urls']:
-            print 'get_media_requests: %s' % image_url
+            # print 'get_media_requests: %s' % image_url
             yield Request(image_url)
 
     def item_completed(self, results, item, info):
@@ -38,11 +38,11 @@ class ScrapyspiderImagesPipeline(ImagesPipeline):
         # 'url': 'http://www.example.com/images/product1.jpg'
         lurl = url.split('/')
         try:
-            category = '/'.join(lurl[-3:-2])
+            category = '/'.join(lurl[-3:-1])
             image_name = lurl[-1]
         except KeyError:
             category = 'unknow'
             image_name = '%s.jpg' % hashlib.sha1(to_bytes(url)).hexdigest()
 
-        print 'save file to: %s/%s' % (category, image_name)
+        # print 'save file to: %s/%s' % (category, image_name)
         return '%s/%s' % (category, image_name)
